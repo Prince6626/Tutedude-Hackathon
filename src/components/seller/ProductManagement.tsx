@@ -1,10 +1,31 @@
 import React, { useState } from 'react';
-import { Plus, Search, Filter, Edit, Trash2, Eye, Package } from 'lucide-react';
+import { Plus, Search, Filter, Edit, Trash2, Eye, Package, X, Upload, DollarSign, Boxes } from 'lucide-react';
 
 const ProductManagement = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [showAddModal, setShowAddModal] = useState(false);
+  const [showAddStockModal, setShowAddStockModal] = useState(false);
+  const [selectedProduct, setSelectedProduct] = useState<any>(null);
+  
+  // Add Product Form State
+  const [newProduct, setNewProduct] = useState({
+    name: '',
+    category: 'vegetables',
+    price: '',
+    unit: 'per lb',
+    stock: '',
+    description: '',
+    image: ''
+  });
+  
+  // Add Stock Form State
+  const [stockData, setStockData] = useState({
+    quantity: '',
+    costPerUnit: '',
+    supplier: '',
+    notes: ''
+  });
 
   const categories = [
     { id: 'all', name: 'All Categories' },
@@ -88,6 +109,54 @@ const ProductManagement = () => {
   const getCategoryName = (categoryId: string) => {
     const category = categories.find(cat => cat.id === categoryId);
     return category ? category.name : categoryId;
+  };
+
+  // Form Handlers
+  const handleAddProduct = async (e: React.FormEvent) => {
+    e.preventDefault();
+    try {
+      // Here you would typically send the data to your API
+      console.log('Adding product:', newProduct);
+      alert('Product added successfully!');
+      setShowAddModal(false);
+      setNewProduct({
+        name: '',
+        category: 'vegetables',
+        price: '',
+        unit: 'per lb',
+        stock: '',
+        description: '',
+        image: ''
+      });
+    } catch (error) {
+      console.error('Error adding product:', error);
+      alert('Failed to add product. Please try again.');
+    }
+  };
+
+  const handleAddStock = async (e: React.FormEvent) => {
+    e.preventDefault();
+    try {
+      // Here you would typically send the data to your API
+      console.log('Adding stock for product:', selectedProduct?.name, stockData);
+      alert('Stock added successfully!');
+      setShowAddStockModal(false);
+      setSelectedProduct(null);
+      setStockData({
+        quantity: '',
+        costPerUnit: '',
+        supplier: '',
+        notes: ''
+      });
+    } catch (error) {
+      console.error('Error adding stock:', error);
+      alert('Failed to add stock. Please try again.');
+    }
+  };
+
+  const openAddStockModal = (product: any) => {
+    setSelectedProduct(product);
+    setShowAddStockModal(true);
   };
 
   return (
@@ -223,17 +292,26 @@ const ProductManagement = () => {
                 </div>
               </div>
               
-              <div className="flex space-x-2">
-                <button className="flex-1 bg-gray-100 text-gray-700 px-4 py-2 rounded-lg font-medium hover:bg-gray-200 transition-colors duration-200 flex items-center justify-center space-x-1">
-                  <Eye className="h-4 w-4" />
-                  <span>View</span>
-                </button>
-                <button className="flex-1 bg-green-100 text-green-700 px-4 py-2 rounded-lg font-medium hover:bg-green-200 transition-colors duration-200 flex items-center justify-center space-x-1">
-                  <Edit className="h-4 w-4" />
-                  <span>Edit</span>
-                </button>
-                <button className="px-4 py-2 bg-red-100 text-red-700 rounded-lg font-medium hover:bg-red-200 transition-colors duration-200">
-                  <Trash2 className="h-4 w-4" />
+              <div className="flex flex-col space-y-2">
+                <div className="flex space-x-2">
+                  <button className="flex-1 bg-gray-100 text-gray-700 px-4 py-2 rounded-lg font-medium hover:bg-gray-200 transition-colors duration-200 flex items-center justify-center space-x-1">
+                    <Eye className="h-4 w-4" />
+                    <span>View</span>
+                  </button>
+                  <button className="flex-1 bg-green-100 text-green-700 px-4 py-2 rounded-lg font-medium hover:bg-green-200 transition-colors duration-200 flex items-center justify-center space-x-1">
+                    <Edit className="h-4 w-4" />
+                    <span>Edit</span>
+                  </button>
+                  <button className="px-4 py-2 bg-red-100 text-red-700 rounded-lg font-medium hover:bg-red-200 transition-colors duration-200">
+                    <Trash2 className="h-4 w-4" />
+                  </button>
+                </div>
+                <button 
+                  onClick={() => openAddStockModal(product)}
+                  className="w-full bg-blue-500 text-white px-4 py-2 rounded-lg font-medium hover:bg-blue-600 transition-colors duration-200 flex items-center justify-center space-x-2"
+                >
+                  <Boxes className="h-4 w-4" />
+                  <span>Add Stock</span>
                 </button>
               </div>
             </div>
@@ -253,6 +331,266 @@ const ProductManagement = () => {
             >
               Add Your First Product
             </button>
+          </div>
+        </div>
+      )}
+
+      {/* Add Product Modal */}
+      {showAddModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+            <div className="flex items-center justify-between p-6 border-b border-gray-200">
+              <h3 className="text-xl font-bold text-gray-900">Add New Product</h3>
+              <button
+                onClick={() => setShowAddModal(false)}
+                className="p-2 hover:bg-gray-100 rounded-lg transition-colors duration-200"
+              >
+                <X className="h-5 w-5 text-gray-500" />
+              </button>
+            </div>
+            
+            <form onSubmit={handleAddProduct} className="p-6 space-y-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Product Name
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    value={newProduct.name}
+                    onChange={(e) => setNewProduct({...newProduct, name: e.target.value})}
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                    placeholder="Enter product name"
+                  />
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Category
+                  </label>
+                  <select
+                    value={newProduct.category}
+                    onChange={(e) => setNewProduct({...newProduct, category: e.target.value})}
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                  >
+                    {categories.filter(cat => cat.id !== 'all').map(category => (
+                      <option key={category.id} value={category.id}>
+                        {category.name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Price (₹)
+                  </label>
+                  <div className="relative">
+                    <DollarSign className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+                    <input
+                      type="number"
+                      step="0.01"
+                      required
+                      value={newProduct.price}
+                      onChange={(e) => setNewProduct({...newProduct, price: e.target.value})}
+                      className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                      placeholder="0.00"
+                    />
+                  </div>
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Unit
+                  </label>
+                  <select
+                    value={newProduct.unit}
+                    onChange={(e) => setNewProduct({...newProduct, unit: e.target.value})}
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                  >
+                    <option value="per lb">per lb</option>
+                    <option value="per kg">per kg</option>
+                    <option value="per piece">per piece</option>
+                    <option value="per gallon">per gallon</option>
+                    <option value="per liter">per liter</option>
+                    <option value="per dozen">per dozen</option>
+                  </select>
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Initial Stock
+                  </label>
+                  <input
+                    type="number"
+                    required
+                    value={newProduct.stock}
+                    onChange={(e) => setNewProduct({...newProduct, stock: e.target.value})}
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                    placeholder="Enter initial stock quantity"
+                  />
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Product Image URL
+                  </label>
+                  <div className="relative">
+                    <Upload className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+                    <input
+                      type="url"
+                      value={newProduct.image}
+                      onChange={(e) => setNewProduct({...newProduct, image: e.target.value})}
+                      className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                      placeholder="https://example.com/image.jpg"
+                    />
+                  </div>
+                </div>
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Description
+                </label>
+                <textarea
+                  value={newProduct.description}
+                  onChange={(e) => setNewProduct({...newProduct, description: e.target.value})}
+                  rows={4}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                  placeholder="Enter product description"
+                />
+              </div>
+              
+              <div className="flex space-x-4 pt-4">
+                <button
+                  type="button"
+                  onClick={() => setShowAddModal(false)}
+                  className="flex-1 px-6 py-3 border border-gray-300 text-gray-700 rounded-lg font-medium hover:bg-gray-50 transition-colors duration-200"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="flex-1 px-6 py-3 bg-gradient-to-r from-green-500 to-blue-500 text-white rounded-lg font-medium hover:shadow-lg transform hover:-translate-y-0.5 transition-all duration-200"
+                >
+                  Add Product
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Add Stock Modal */}
+      {showAddStockModal && selectedProduct && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl shadow-xl max-w-lg w-full">
+            <div className="flex items-center justify-between p-6 border-b border-gray-200">
+              <div>
+                <h3 className="text-xl font-bold text-gray-900">Add Stock</h3>
+                <p className="text-gray-600">Adding stock to {selectedProduct.name}</p>
+              </div>
+              <button
+                onClick={() => setShowAddStockModal(false)}
+                className="p-2 hover:bg-gray-100 rounded-lg transition-colors duration-200"
+              >
+                <X className="h-5 w-5 text-gray-500" />
+              </button>
+            </div>
+            
+            <form onSubmit={handleAddStock} className="p-6 space-y-6">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Quantity to Add
+                </label>
+                <div className="relative">
+                  <Boxes className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+                  <input
+                    type="number"
+                    required
+                    value={stockData.quantity}
+                    onChange={(e) => setStockData({...stockData, quantity: e.target.value})}
+                    className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    placeholder="Enter quantity"
+                  />
+                </div>
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Cost per Unit (₹)
+                </label>
+                <div className="relative">
+                  <DollarSign className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+                  <input
+                    type="number"
+                    step="0.01"
+                    required
+                    value={stockData.costPerUnit}
+                    onChange={(e) => setStockData({...stockData, costPerUnit: e.target.value})}
+                    className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    placeholder="0.00"
+                  />
+                </div>
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Supplier
+                </label>
+                <input
+                  type="text"
+                  value={stockData.supplier}
+                  onChange={(e) => setStockData({...stockData, supplier: e.target.value})}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  placeholder="Enter supplier name"
+                />
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Notes (Optional)
+                </label>
+                <textarea
+                  value={stockData.notes}
+                  onChange={(e) => setStockData({...stockData, notes: e.target.value})}
+                  rows={3}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  placeholder="Add any notes about this stock addition"
+                />
+              </div>
+              
+              <div className="bg-gray-50 p-4 rounded-lg">
+                <h4 className="font-medium text-gray-900 mb-2">Current Stock Information</h4>
+                <div className="grid grid-cols-2 gap-4 text-sm">
+                  <div>
+                    <span className="text-gray-600">Current Stock:</span>
+                    <span className="ml-2 font-medium">{selectedProduct.stock} {selectedProduct.unit.replace('per ', '')}</span>
+                  </div>
+                  <div>
+                    <span className="text-gray-600">Current Price:</span>
+                    <span className="ml-2 font-medium">₹{selectedProduct.price}</span>
+                  </div>
+                </div>
+              </div>
+              
+              <div className="flex space-x-4 pt-4">
+                <button
+                  type="button"
+                  onClick={() => setShowAddStockModal(false)}
+                  className="flex-1 px-6 py-3 border border-gray-300 text-gray-700 rounded-lg font-medium hover:bg-gray-50 transition-colors duration-200"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="flex-1 px-6 py-3 bg-blue-500 text-white rounded-lg font-medium hover:bg-blue-600 transition-colors duration-200"
+                >
+                  Add Stock
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       )}
