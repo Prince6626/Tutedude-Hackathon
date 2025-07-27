@@ -22,7 +22,7 @@ const SellerOverview = () => {
     },
     {
       name: 'Revenue',
-      value: '$15,600',
+      value: '₹15,600',
       change: '+8% from last month',
       changeType: 'positive',
       icon: DollarSign,
@@ -197,7 +197,7 @@ const SellerOverview = () => {
                   <p className="text-sm text-gray-500">{product.category} • {product.orders} orders</p>
                 </div>
                 <div className="text-right">
-                  <p className="font-semibold text-gray-900">${product.revenue}</p>
+                  <p className="font-semibold text-gray-900">₹{product.revenue}</p>
                   <p className="text-sm text-gray-500">{product.stock} in stock</p>
                 </div>
                 <div className="flex space-x-1">
@@ -230,7 +230,7 @@ const SellerOverview = () => {
                   <p className="text-sm text-gray-500">{order.items}</p>
                 </div>
                 <div className="text-right">
-                  <p className="font-semibold text-gray-900">${order.amount}</p>
+                  <p className="font-semibold text-gray-900">₹{order.amount}</p>
                   <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getStatusBadge(order.status)}`}>
                     {order.status}
                   </span>

@@ -192,7 +192,7 @@ const UserManagement = () => {
                     {user.orders}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                    ${user.revenue.toLocaleString()}
+                    <p className="text-sm text-gray-500">₹{user.revenue.toLocaleString()}</p>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                     <div className="flex items-center space-x-2">

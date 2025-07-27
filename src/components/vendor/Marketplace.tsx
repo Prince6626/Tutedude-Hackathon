@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { Search, Filter, MapPin, Star, ShoppingCart, MessageCircle, Heart, Eye, Truck } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { productsAPI, suppliersAPI } from '../../services/api';
+import { useCart } from '../../contexts/CartContext';
 
 interface Product {
   id: number;
   name: string;
-  supplier: string;
+  supplierName: string;
   supplierId: number;
   price: number;
   unit: string;
@@ -19,28 +21,24 @@ interface Product {
   minOrder: number;
   deliveryTime: string;
   inStock: boolean;
-  supplierRating: number;
   supplierImage: string;
 }
 
 interface Supplier {
   id: number;
-  name: string;
-  rating: number;
-  reviews: number;
-  location: string;
-  distance: string;
-  categories: string[];
-  image: string;
-  description: string;
+  supplierName: string;
+  businessName: string;
+  supplierImage: string;
   totalProducts: number;
-  responseTime: string;
-  minOrder: number;
-  deliveryTime: string;
-  verified: boolean;
+  averageRating: number;
+  totalReviews: number;
+  responseTime?: string;
+  minOrder?: number;
+  deliveryTime?: string;
 }
 
 const VendorMarketplace = () => {
+  const { cartItems, addToCart } = useCart();
   const [activeTab, setActiveTab] = useState<'products' | 'suppliers'>('products');
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
@@ -49,7 +47,10 @@ const VendorMarketplace = () => {
   const [sortBy, setSortBy] = useState('relevance');
   const [showFilters, setShowFilters] = useState(false);
   const [favorites, setFavorites] = useState<number[]>([]);
-  const [cartItems, setCartItems] = useState<number[]>([]);
+  const [products, setProducts] = useState<Product[]>([]);
+  const [suppliers, setSuppliers] = useState<Supplier[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
 
   const categories = [
     { id: 'all', name: 'All Categories', icon: '🛒' },
@@ -73,200 +74,53 @@ const VendorMarketplace = () => {
     { id: 'oakland', name: 'Oakland, CA' }
   ];
 
-  const products: Product[] = [
-    {
-      id: 1,
-      name: 'Fresh Tomatoes',
-      supplier: 'Green Valley Farms',
-      supplierId: 1,
-      price: 2.50,
-      unit: 'per lb',
-      rating: 4.8,
-      reviews: 124,
-      location: 'Los Angeles, CA',
-      distance: '5.2 miles',
-      category: 'vegetables',
-      image: 'https://images.pexels.com/photos/533280/pexels-photo-533280.jpeg?auto=compress&cs=tinysrgb&w=300&h=200&fit=crop',
-      description: 'Fresh, ripe tomatoes perfect for cooking',
-      minOrder: 10,
-      deliveryTime: '1-2 days',
-      inStock: true,
-      supplierRating: 4.9,
-      supplierImage: 'https://images.pexels.com/photos/3785079/pexels-photo-3785079.jpeg?auto=compress&cs=tinysrgb&w=100&h=100&fit=crop'
-    },
-    {
-      id: 2,
-      name: 'Premium Ground Beef',
-      supplier: 'Quality Meats Co.',
-      supplierId: 2,
-      price: 8.99,
-      unit: 'per lb',
-      rating: 4.9,
-      reviews: 89,
-      location: 'San Francisco, CA',
-      distance: '12.8 miles',
-      category: 'meat',
-      image: 'https://images.pexels.com/photos/2338407/pexels-photo-2338407.jpeg?auto=compress&cs=tinysrgb&w=300&h=200&fit=crop',
-      description: 'High-quality ground beef, 80/20 lean',
-      minOrder: 5,
-      deliveryTime: '1-3 days',
-      inStock: true,
-      supplierRating: 4.8,
-      supplierImage: 'https://images.pexels.com/photos/3763188/pexels-photo-3763188.jpeg?auto=compress&cs=tinysrgb&w=100&h=100&fit=crop'
-    },
-    {
-      id: 3,
-      name: 'Organic Bananas',
-      supplier: 'Tropical Fruits Inc.',
-      supplierId: 3,
-      price: 1.25,
-      unit: 'per lb',
-      rating: 4.6,
-      reviews: 156,
-      location: 'San Diego, CA',
-      distance: '8.3 miles',
-      category: 'fruits',
-      image: 'https://images.pexels.com/photos/2872755/pexels-photo-2872755.jpeg?auto=compress&cs=tinysrgb&w=300&h=200&fit=crop',
-      description: 'Sweet, organic bananas perfect for smoothies',
-      minOrder: 15,
-      deliveryTime: '2-3 days',
-      inStock: true,
-      supplierRating: 4.7,
-      supplierImage: 'https://images.pexels.com/photos/3777943/pexels-photo-3777943.jpeg?auto=compress&cs=tinysrgb&w=100&h=100&fit=crop'
-    },
-    {
-      id: 4,
-      name: 'Whole Milk',
-      supplier: 'Dairy Best',
-      supplierId: 4,
-      price: 3.25,
-      unit: 'per gallon',
-      rating: 4.6,
-      reviews: 78,
-      location: 'Fresno, CA',
-      distance: '45.2 miles',
-      category: 'dairy',
-      image: 'https://images.pexels.com/photos/236010/pexels-photo-236010.jpeg?auto=compress&cs=tinysrgb&w=300&h=200&fit=crop',
-      description: 'Fresh whole milk from local farms',
-      minOrder: 5,
-      deliveryTime: '1-2 days',
-      inStock: false,
-      supplierRating: 4.6,
-      supplierImage: 'https://images.pexels.com/photos/3764578/pexels-photo-3764578.jpeg?auto=compress&cs=tinysrgb&w=100&h=100&fit=crop'
-    },
-    {
-      id: 5,
-      name: 'Mixed Spice Blend',
-      supplier: 'Spice Masters',
-      supplierId: 5,
-      price: 12.99,
-      unit: 'per 5lb bag',
-      rating: 4.9,
-      reviews: 203,
-      location: 'Oakland, CA',
-      distance: '15.7 miles',
-      category: 'spices',
-      image: 'https://images.pexels.com/photos/1340116/pexels-photo-1340116.jpeg?auto=compress&cs=tinysrgb&w=300&h=200&fit=crop',
-      description: 'Premium spice blend for authentic flavors',
-      minOrder: 2,
-      deliveryTime: '2-3 days',
-      inStock: true,
-      supplierRating: 4.9,
-      supplierImage: 'https://images.pexels.com/photos/3777943/pexels-photo-3777943.jpeg?auto=compress&cs=tinysrgb&w=100&h=100&fit=crop'
-    },
-    {
-      id: 6,
-      name: 'Basmati Rice',
-      supplier: 'Golden Grains Co.',
-      supplierId: 6,
-      price: 4.50,
-      unit: 'per 10lb bag',
-      rating: 4.7,
-      reviews: 92,
-      location: 'Sacramento, CA',
-      distance: '25.1 miles',
-      category: 'grains',
-      image: 'https://images.pexels.com/photos/723198/pexels-photo-723198.jpeg?auto=compress&cs=tinysrgb&w=300&h=200&fit=crop',
-      description: 'Premium long-grain basmati rice',
-      minOrder: 5,
-      deliveryTime: '2-4 days',
-      inStock: true,
-      supplierRating: 4.5,
-      supplierImage: 'https://images.pexels.com/photos/3785079/pexels-photo-3785079.jpeg?auto=compress&cs=tinysrgb&w=100&h=100&fit=crop'
-    }
-  ];
+  // Load products and suppliers from API
+  useEffect(() => {
+    loadProducts();
+    loadSuppliers();
+  }, [selectedCategory, searchTerm]);
 
-  const suppliers: Supplier[] = [
-    {
-      id: 1,
-      name: 'Green Valley Farms',
-      rating: 4.9,
-      reviews: 124,
-      location: 'Los Angeles, CA',
-      distance: '5.2 miles',
-      categories: ['vegetables', 'fruits'],
-      image: 'https://images.pexels.com/photos/3785079/pexels-photo-3785079.jpeg?auto=compress&cs=tinysrgb&w=300&h=200&fit=crop',
-      description: 'Premium organic vegetables and fresh produce. Family-owned farm with 20+ years of experience.',
-      totalProducts: 45,
-      responseTime: '< 2 hours',
-      minOrder: 25,
-      deliveryTime: '1-2 days',
-      verified: true
-    },
-    {
-      id: 2,
-      name: 'Quality Meats Co.',
-      rating: 4.8,
-      reviews: 89,
-      location: 'San Francisco, CA',
-      distance: '12.8 miles',
-      categories: ['meat'],
-      image: 'https://images.pexels.com/photos/3763188/pexels-photo-3763188.jpeg?auto=compress&cs=tinysrgb&w=300&h=200&fit=crop',
-      description: 'High-quality meat and seafood supplier. USDA certified with strict quality standards.',
-      totalProducts: 28,
-      responseTime: '< 4 hours',
-      minOrder: 50,
-      deliveryTime: '1-3 days',
-      verified: true
-    },
-    {
-      id: 3,
-      name: 'Spice Masters',
-      rating: 4.9,
-      reviews: 203,
-      location: 'Oakland, CA',
-      distance: '15.7 miles',
-      categories: ['spices'],
-      image: 'https://images.pexels.com/photos/3777943/pexels-photo-3777943.jpeg?auto=compress&cs=tinysrgb&w=300&h=200&fit=crop',
-      description: 'Authentic spices and seasonings from around the world. Bulk quantities available.',
-      totalProducts: 67,
-      responseTime: '< 1 hour',
-      minOrder: 30,
-      deliveryTime: '2-3 days',
-      verified: true
+  const loadProducts = async () => {
+    setLoading(true);
+    setError('');
+    
+    try {
+      const filters: any = {};
+      if (selectedCategory !== 'all') {
+        filters.category = selectedCategory;
+      }
+      if (searchTerm) {
+        filters.search = searchTerm;
+      }
+      
+      const productsData = await productsAPI.getAll(filters);
+      console.log('Loaded products:', productsData);
+      setProducts(productsData || []);
+    } catch (err) {
+      setError('Failed to load products');
+      console.error('Error loading products:', err);
+    } finally {
+      setLoading(false);
     }
-  ];
+  };
+
+  const loadSuppliers = async () => {
+    try {
+      const suppliersData = await suppliersAPI.getAll();
+      console.log('Loaded suppliers:', suppliersData);
+      setSuppliers(suppliersData || []);
+    } catch (err) {
+      console.error('Error loading suppliers:', err);
+    }
+  };
 
   // Filter products
   const filteredProducts = products.filter(product => {
-    const matchesSearch = product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         product.supplier.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesCategory = selectedCategory === 'all' || product.category === selectedCategory;
     const matchesLocation = selectedLocation === 'all' || 
-                           product.location.toLowerCase().includes(locations.find(l => l.id === selectedLocation)?.name.toLowerCase() || '');
+                           product.location?.toLowerCase().includes(locations.find(l => l.id === selectedLocation)?.name.toLowerCase() || '');
     const matchesPrice = (!priceRange.min || product.price >= parseFloat(priceRange.min)) &&
                         (!priceRange.max || product.price <= parseFloat(priceRange.max));
-    return matchesSearch && matchesCategory && matchesLocation && matchesPrice;
-  });
-
-  // Filter suppliers
-  const filteredSuppliers = suppliers.filter(supplier => {
-    const matchesSearch = supplier.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         supplier.description.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesCategory = selectedCategory === 'all' || supplier.categories.includes(selectedCategory);
-    const matchesLocation = selectedLocation === 'all' || 
-                           supplier.location.toLowerCase().includes(locations.find(l => l.id === selectedLocation)?.name.toLowerCase() || '');
-    return matchesSearch && matchesCategory && matchesLocation;
+    return matchesLocation && matchesPrice;
   });
 
   // Sort products
@@ -285,16 +139,24 @@ const VendorMarketplace = () => {
     }
   });
 
+  // Check if product is in cart
+  const isProductInCart = (productId: number) => {
+    return cartItems.some(item => item.productId === productId);
+  };
+
   // Add to cart function
-  const addToCart = async (product: Product) => {
-    // Add to local cart state
-    setCartItems(prev => [...prev, product.id]);
-    alert('Product added to cart successfully!');
+  const handleAddToCart = async (product: Product) => {
+    try {
+      await addToCart(product.id, 1);
+      alert('Product added to cart successfully!');
+    } catch (error) {
+      alert('Failed to add product to cart');
+      console.error('Error adding to cart:', error);
+    }
   };
 
   // Toggle favorite
   const toggleFavorite = async (id: number) => {
-    // Toggle favorite in local state
     const isFavorite = favorites.includes(id);
     setFavorites(prev => 
       isFavorite 
@@ -305,9 +167,33 @@ const VendorMarketplace = () => {
 
   // Contact supplier
   const contactSupplier = async (supplierId: number, supplierName: string) => {
-    // Simulate sending message
     alert(`Message sent to ${supplierName} successfully!`);
   };
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-orange-500"></div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="text-center py-12">
+        <div className="bg-white p-8 rounded-2xl shadow-lg max-w-md mx-auto">
+          <h3 className="text-xl font-bold text-gray-900 mb-2">Error Loading Products</h3>
+          <p className="text-gray-600 mb-4">{error}</p>
+          <button
+            onClick={loadProducts}
+            className="bg-gradient-to-r from-orange-500 to-red-500 text-white px-6 py-3 rounded-lg font-semibold hover:shadow-lg transform hover:-translate-y-0.5 transition-all duration-200"
+          >
+            Try Again
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -348,7 +234,7 @@ const VendorMarketplace = () => {
                   : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
               }`}
             >
-              Suppliers ({filteredSuppliers.length})
+              Suppliers (Coming Soon)
             </button>
           </nav>
         </div>
@@ -488,10 +374,10 @@ const VendorMarketplace = () => {
                 <div className="flex items-center space-x-2 mb-2">
                   <img
                     src={product.supplierImage}
-                    alt={product.supplier}
+                    alt={product.supplierName}
                     className="w-6 h-6 rounded-full object-cover"
                   />
-                  <p className="text-gray-600 text-sm">{product.supplier}</p>
+                  <p className="text-gray-600 text-sm">{product.supplierName}</p>
                 </div>
                 
                 <div className="flex items-center text-gray-500 text-sm mb-3">
@@ -503,7 +389,7 @@ const VendorMarketplace = () => {
 
                 <div className="flex items-center justify-between mb-4">
                   <div>
-                    <span className="text-2xl font-bold text-green-600">${product.price}</span>
+                    <span className="text-2xl font-bold text-orange-600">₹{product.price}</span>
                     <span className="text-gray-500 ml-1">{product.unit}</span>
                   </div>
                   <div className="text-right text-sm text-gray-500">
@@ -524,13 +410,13 @@ const VendorMarketplace = () => {
                     <span>View</span>
                   </Link>
                   <button
-                    onClick={() => addToCart(product)}
-                    disabled={!product.inStock || cartItems.includes(product.id)}
+                    onClick={() => handleAddToCart(product)}
+                    disabled={!product.inStock || isProductInCart(product.id)}
                     className="flex-1 bg-gradient-to-r from-orange-500 to-red-500 text-white px-4 py-2 rounded-lg font-medium hover:shadow-lg transform hover:-translate-y-0.5 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center space-x-1"
                   >
                     <ShoppingCart className="h-4 w-4" />
                     <span>
-                      {cartItems.includes(product.id) ? 'Added' : 'Add to Cart'}
+                      {isProductInCart(product.id) ? 'Added' : 'Add to Cart'}
                     </span>
                   </button>
                 </div>
@@ -542,91 +428,59 @@ const VendorMarketplace = () => {
 
       {/* Suppliers Grid */}
       {activeTab === 'suppliers' && (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {filteredSuppliers.map(supplier => (
-            <div key={supplier.id} className="bg-white rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden">
-              <div className="relative">
-                <img
-                  src={supplier.image}
-                  alt={supplier.name}
-                  className="w-full h-48 object-cover"
-                />
-                {supplier.verified && (
-                  <div className="absolute top-4 left-4 bg-green-500 text-white px-2 py-1 rounded text-xs font-semibold flex items-center space-x-1">
-                    <Star className="h-3 w-3 fill-current" />
-                    <span>Verified</span>
-                  </div>
-                )}
-                <button
-                  onClick={() => toggleFavorite(supplier.id)}
-                  className={`absolute top-4 right-4 p-2 rounded-full shadow-lg transition-colors duration-200 ${
-                    favorites.includes(supplier.id)
-                      ? 'bg-red-500 text-white'
-                      : 'bg-white text-gray-400 hover:text-red-500'
-                  }`}
-                >
-                  <Heart className={`h-4 w-4 ${favorites.includes(supplier.id) ? 'fill-current' : ''}`} />
-                </button>
-              </div>
-              
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {suppliers.map(supplier => (
+            <div key={supplier.id} className="bg-white rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2 overflow-hidden">
               <div className="p-6">
-                <div className="flex items-start justify-between mb-3">
+                <div className="flex items-center space-x-4 mb-4">
+                  <img
+                    src={supplier.supplierImage || 'https://via.placeholder.com/60'}
+                    alt={supplier.supplierName}
+                    className="w-15 h-15 rounded-full object-cover"
+                  />
                   <div>
-                    <h3 className="text-xl font-bold text-gray-900">{supplier.name}</h3>
-                    <div className="flex items-center space-x-2 mt-1">
-                      <div className="flex items-center space-x-1">
-                        <Star className="h-4 w-4 text-yellow-400 fill-current" />
-                        <span className="text-sm font-medium">{supplier.rating}</span>
-                        <span className="text-sm text-gray-500">({supplier.reviews})</span>
-                      </div>
-                    </div>
-                  </div>
-                  <div className="text-right text-sm text-gray-500">
-                    <p>{supplier.totalProducts} products</p>
-                    <p>Response: {supplier.responseTime}</p>
+                    <h3 className="text-xl font-bold text-gray-900">{supplier.supplierName}</h3>
+                    <p className="text-gray-600 text-sm">{supplier.businessName}</p>
                   </div>
                 </div>
-
-                <div className="flex items-center text-gray-500 text-sm mb-3">
-                  <MapPin className="h-4 w-4 mr-1" />
-                  <span>{supplier.location} • {supplier.distance}</span>
+                
+                <div className="flex items-center space-x-1 mb-3">
+                  <Star className="h-4 w-4 text-yellow-400 fill-current" />
+                  <span className="text-sm font-medium">{supplier.averageRating?.toFixed(1) || '0.0'}</span>
+                  <span className="text-gray-500 text-sm">({supplier.totalReviews || 0} reviews)</span>
                 </div>
 
-                <p className="text-gray-600 text-sm mb-4">{supplier.description}</p>
-
-                <div className="mb-4">
-                  <div className="flex flex-wrap gap-2">
-                    {supplier.categories.map((category, index) => (
-                      <span
-                        key={index}
-                        className="px-2 py-1 bg-orange-100 text-orange-800 text-xs font-medium rounded-full"
-                      >
-                        {categories.find(cat => cat.id === category)?.name || category}
-                      </span>
-                    ))}
+                <div className="space-y-2 mb-4">
+                  <div className="flex justify-between text-sm">
+                    <span className="text-gray-600">Products:</span>
+                    <span className="font-medium">{supplier.totalProducts || 0}</span>
                   </div>
-                </div>
-
-                <div className="grid grid-cols-2 gap-4 text-sm text-gray-600 mb-4">
-                  <div>
-                    <span className="font-medium">Min Order:</span> ${supplier.minOrder}
+                  <div className="flex justify-between text-sm">
+                    <span className="text-gray-600">Response Time:</span>
+                    <span className="font-medium">{supplier.responseTime || '< 2 hours'}</span>
                   </div>
-                  <div>
-                    <span className="font-medium">Delivery:</span> {supplier.deliveryTime}
+                  <div className="flex justify-between text-sm">
+                    <span className="text-gray-600">Min Order:</span>
+                    <span className="font-medium">₹{supplier.minOrder || 25}</span>
                   </div>
                 </div>
 
                 <div className="flex space-x-2">
-                  <Link
-                    to={`/vendor/suppliers/${supplier.id}`}
-                    className="flex-1 bg-gray-100 text-gray-700 px-4 py-2 rounded-lg font-medium hover:bg-gray-200 transition-colors duration-200 text-center flex items-center justify-center space-x-1"
+                  <button
+                    onClick={() => {
+                      setActiveTab('products');
+                      setSelectedCategory('all');
+                      // Filter products by this supplier
+                      setSearchTerm(supplier.supplierName);
+                    }}
+                    className="flex-1 bg-gradient-to-r from-orange-500 to-red-500 text-white px-4 py-2 rounded-lg font-medium hover:shadow-lg transform hover:-translate-y-0.5 transition-all duration-200 flex items-center justify-center space-x-1"
                   >
                     <Eye className="h-4 w-4" />
-                    <span>View Profile</span>
-                  </Link>
+                    <span>View Products</span>
+                  </button>
                   <button
-                    onClick={() => contactSupplier(supplier.id, supplier.name)}
-                    className="flex-1 bg-orange-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-orange-700 transition-colors duration-200 flex items-center justify-center space-x-1"
+                    onClick={() => contactSupplier(supplier.id, supplier.supplierName)}
+                    className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg font-medium hover:bg-gray-200 transition-colors duration-200 flex items-center space-x-1"
                   >
                     <MessageCircle className="h-4 w-4" />
                     <span>Contact</span>
@@ -638,13 +492,12 @@ const VendorMarketplace = () => {
         </div>
       )}
 
-      {/* Empty State */}
-      {((activeTab === 'products' && sortedProducts.length === 0) || 
-        (activeTab === 'suppliers' && filteredSuppliers.length === 0)) && (
+      {/* Empty State for Products */}
+      {activeTab === 'products' && sortedProducts.length === 0 && (
         <div className="text-center py-12">
           <div className="bg-white p-8 rounded-2xl shadow-lg max-w-md mx-auto">
             <Search className="h-16 w-16 text-gray-400 mx-auto mb-4" />
-            <h3 className="text-xl font-bold text-gray-900 mb-2">No {activeTab} found</h3>
+            <h3 className="text-xl font-bold text-gray-900 mb-2">No products found</h3>
             <p className="text-gray-600 mb-4">Try adjusting your search terms or filters</p>
             <button
               onClick={() => {
@@ -657,6 +510,17 @@ const VendorMarketplace = () => {
             >
               Clear Filters
             </button>
+          </div>
+        </div>
+      )}
+
+      {/* Empty State for Suppliers */}
+      {activeTab === 'suppliers' && suppliers.length === 0 && (
+        <div className="text-center py-12">
+          <div className="bg-white p-8 rounded-2xl shadow-lg max-w-md mx-auto">
+            <Search className="h-16 w-16 text-gray-400 mx-auto mb-4" />
+            <h3 className="text-xl font-bold text-gray-900 mb-2">No suppliers found</h3>
+            <p className="text-gray-600 mb-4">No suppliers are currently available</p>
           </div>
         </div>
       )}

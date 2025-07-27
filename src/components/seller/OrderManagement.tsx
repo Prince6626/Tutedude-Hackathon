@@ -1,82 +1,110 @@
 import React, { useState, useEffect } from 'react';
-import { Search, Filter, Eye, CheckCircle, XCircle, Clock, Truck } from 'lucide-react';
+import { Search, Filter, Eye, CheckCircle, XCircle, Clock, Truck, Bell, Package } from 'lucide-react';
+import { ordersAPI, deliveryAPI, deliveryPartnerAPI } from '../../services/api';
+
+interface Order {
+  id: number;
+  orderNumber: string;
+  vendorName: string;
+  vendorEmail?: string;
+  total: number;
+  status: string;
+  orderDate: string;
+  deliveryDate?: string;
+  paymentMethod: string;
+  deliveryAddress: string;
+  specialInstructions?: string;
+  items?: any[];
+}
 
 const OrderManagement = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedStatus, setSelectedStatus] = useState('all');
-  const [orders, setOrders] = useState([]);
-  const [selectedOrder, setSelectedOrder] = useState(null);
+  const [orders, setOrders] = useState<Order[]>([]);
+  const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
   const [showOrderDetails, setShowOrderDetails] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [newOrdersCount, setNewOrdersCount] = useState(0);
 
-  // Load orders from localStorage on component mount
+  // Load orders from API
   useEffect(() => {
-    const loadOrders = () => {
+    const loadOrders = async () => {
       try {
-        const supplierOrders = JSON.parse(localStorage.getItem('supplierOrders') || '[]');
+        setLoading(true);
+        const response = await ordersAPI.getAll();
         
-        // Filter orders for current supplier (assuming supplier ID 1 for Green Valley Farms)
-        const currentSupplierId = 1; // This would come from auth context in real app
-        const filteredOrders = supplierOrders.filter(order => order.supplierId === currentSupplierId);
-        
-        // Add default orders if none exist
-        if (filteredOrders.length === 0) {
-          const defaultOrders = [
-            {
-              id: 'ORD-001',
-              vendor: 'Maria\'s Tacos',
-              vendorEmail: 'maria@example.com',
-              items: [
-                { name: 'Fresh Tomatoes', quantity: 10, unit: 'lbs', price: 2.50 },
-                { name: 'Organic Onions', quantity: 5, unit: 'lbs', price: 1.75 }
-              ],
-              total: 33.75,
-              status: 'pending',
-              orderDate: '2024-01-20',
-              deliveryDate: '2024-01-22',
-              paymentMethod: 'Credit Card',
-              shippingAddress: '123 Main St, Los Angeles, CA 90210'
+        // Load order items for each order
+        const ordersWithItems = await Promise.all(
+          (response || []).map(async (order: Order) => {
+            try {
+              const items = await ordersAPI.getItems(order.id);
+              return {
+                ...order,
+                items: items || []
+              };
+            } catch (error) {
+              console.error(`Error loading items for order ${order.id}:`, error);
+              return {
+                ...order,
+                items: []
+              };
             }
-          ];
-          setOrders(defaultOrders);
-        } else {
-          // Map the stored orders to match the expected format
-          const mappedOrders = filteredOrders.map(order => ({
-            id: order.id,
-            vendor: order.vendorName,
-            vendorEmail: order.vendorEmail,
-            items: order.items,
-            total: order.total,
-            status: order.status,
-            orderDate: order.orderDate,
-            deliveryDate: order.deliveryDate,
-            paymentMethod: order.paymentMethod,
-            shippingAddress: order.deliveryAddress,
-            specialInstructions: order.specialInstructions
-          }));
-          setOrders(mappedOrders);
-        }
+          })
+        );
+        
+        setOrders(ordersWithItems);
+        
+        // Count new orders (pending status)
+        const newOrders = ordersWithItems.filter((order: Order) => order.status === 'pending');
+        setNewOrdersCount(newOrders.length);
       } catch (error) {
         console.error('Error loading orders:', error);
         setOrders([]);
+      } finally {
+        setLoading(false);
       }
     };
 
     loadOrders();
 
-    // Listen for storage changes to update orders in real-time
-    const handleStorageChange = (e) => {
-      if (e.key === 'supplierOrders') {
-        loadOrders();
-      }
-    };
-
-    window.addEventListener('storage', handleStorageChange);
-    return () => window.removeEventListener('storage', handleStorageChange);
+    // Poll for new orders every 30 seconds
+    const interval = setInterval(loadOrders, 30000);
+    return () => clearInterval(interval);
   }, []);
 
-  const filteredOrders = orders.filter(order => {
-    const matchesSearch = order.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         order.vendor.toLowerCase().includes(searchTerm.toLowerCase());
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-orange-500"></div>
+      </div>
+    );
+  }
+
+  if (orders.length === 0) {
+    return (
+      <div className="space-y-6">
+        {/* Header */}
+        <div className="flex justify-between items-center mb-6">
+          <div>
+            <h2 className="text-2xl font-bold text-gray-900">Order Management</h2>
+            <p className="text-gray-600">Manage incoming orders from vendors</p>
+          </div>
+        </div>
+
+        <div className="text-center py-12">
+          <div className="bg-white p-8 rounded-2xl shadow-lg max-w-md mx-auto">
+            <Truck className="h-16 w-16 text-gray-400 mx-auto mb-4" />
+            <h3 className="text-xl font-bold text-gray-900 mb-2">No orders yet</h3>
+            <p className="text-gray-600 mb-6">Orders from vendors will appear here when they place orders</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  const filteredOrders = orders.filter((order: Order) => {
+    const matchesSearch = order.orderNumber.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         order.vendorName.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesStatus = selectedStatus === 'all' || order.status === selectedStatus;
     return matchesSearch && matchesStatus;
   });
@@ -84,8 +112,11 @@ const OrderManagement = () => {
   const getStatusBadge = (status: string) => {
     const styles = {
       pending: 'bg-yellow-100 text-yellow-800',
-      processing: 'bg-blue-100 text-blue-800',
-      completed: 'bg-green-100 text-green-800',
+      accepted: 'bg-blue-100 text-blue-800',
+      processing: 'bg-orange-100 text-orange-800',
+      ready: 'bg-green-100 text-green-800',
+      shipped: 'bg-purple-100 text-purple-800',
+      delivered: 'bg-green-100 text-green-800',
       cancelled: 'bg-red-100 text-red-800'
     };
     return styles[status as keyof typeof styles] || 'bg-gray-100 text-gray-800';
@@ -95,49 +126,61 @@ const OrderManagement = () => {
     switch (status) {
       case 'pending':
         return <Clock className="h-4 w-4 text-yellow-600" />;
+      case 'accepted':
+        return <CheckCircle className="h-4 w-4 text-blue-600" />;
       case 'processing':
-        return <Truck className="h-4 w-4 text-blue-600" />;
-      case 'completed':
+        return <Truck className="h-4 w-4 text-orange-600" />;
+      case 'ready':
+        return <Package className="h-4 w-4 text-green-600" />;
+      case 'shipped':
+        return <Truck className="h-4 w-4 text-purple-600" />;
+      case 'delivered':
         return <CheckCircle className="h-4 w-4 text-green-600" />;
       case 'cancelled':
         return <XCircle className="h-4 w-4 text-red-600" />;
       default:
-        return null;
+        return <Clock className="h-4 w-4 text-gray-600" />;
     }
   };
 
-  const handleStatusUpdate = (orderId: string, newStatus: string) => {
+  const handleStatusUpdate = async (orderId: number, newStatus: string) => {
     try {
-      // Update order status in localStorage
-      const supplierOrders = JSON.parse(localStorage.getItem('supplierOrders') || '[]');
-      const vendorOrders = JSON.parse(localStorage.getItem('vendorOrders') || '[]');
+      console.log('Updating order status:', { orderId, newStatus });
+      console.log('Current token:', localStorage.getItem('token'));
+      console.log('Current user:', localStorage.getItem('user'));
       
-      // Update in supplier orders
-      const updatedSupplierOrders = supplierOrders.map(order => 
-        order.id === orderId ? { ...order, status: newStatus } : order
-      );
+      await ordersAPI.updateStatus(orderId, newStatus);
+      setOrders(prev => prev.map((order: Order) => order.id === orderId ? { ...order, status: newStatus } : order));
       
-      // Update in vendor orders
-      const updatedVendorOrders = vendorOrders.map(order => 
-        order.id === orderId ? { ...order, status: newStatus } : order
-      );
+      // If order is accepted, automatically assign delivery partner
+      if (newStatus === 'accepted') {
+        try {
+          const availablePartners = await deliveryPartnerAPI.getAvailable();
+          if (availablePartners.length > 0) {
+            const selectedPartner = availablePartners[0]; // Select first available partner
+            await deliveryAPI.assign(orderId, selectedPartner.id);
+            alert(`✅ Order accepted! Delivery partner ${selectedPartner.name} has been assigned automatically.`);
+          } else {
+            alert('✅ Order accepted! No delivery partners available at the moment.');
+          }
+        } catch (error) {
+          console.error('Error assigning delivery partner:', error);
+          alert('✅ Order accepted! There was an issue assigning a delivery partner.');
+        }
+      }
       
-      localStorage.setItem('supplierOrders', JSON.stringify(updatedSupplierOrders));
-      localStorage.setItem('vendorOrders', JSON.stringify(updatedVendorOrders));
-      
-      // Update local state
-      setOrders(prev => prev.map(order => 
-        order.id === orderId ? { ...order, status: newStatus } : order
-      ));
-      
-      alert(`Order ${orderId} status updated to ${newStatus}`);
+      if (newStatus === 'pending') { 
+        setNewOrdersCount(prev => prev + 1); 
+      } else if (newStatus !== 'pending') { 
+        setNewOrdersCount(prev => Math.max(0, prev - 1)); 
+      }
     } catch (error) {
       console.error('Error updating order status:', error);
       alert('Failed to update order status');
     }
   };
 
-  const handleViewDetails = (order) => {
+  const handleViewDetails = (order: Order) => {
     setSelectedOrder(order);
     setShowOrderDetails(true);
   };
@@ -150,10 +193,20 @@ const OrderManagement = () => {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex justify-between items-center">
+      <div className="flex justify-between items-center mb-6">
         <div>
           <h2 className="text-2xl font-bold text-gray-900">Order Management</h2>
-          <p className="text-gray-600">Track and manage incoming orders from vendors</p>
+          <p className="text-gray-600">Manage incoming orders from vendors</p>
+        </div>
+        <div className="flex items-center space-x-4">
+          {newOrdersCount > 0 && (
+            <div className="relative">
+              <Bell className="h-6 w-6 text-orange-500" />
+              <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
+                {newOrdersCount}
+              </span>
+            </div>
+          )}
         </div>
       </div>
 
@@ -188,13 +241,27 @@ const OrderManagement = () => {
         <div className="bg-white p-6 rounded-2xl shadow-lg">
           <div className="flex items-center justify-between">
             <div>
+              <p className="text-sm font-medium text-gray-600">Accepted</p>
+              <p className="text-3xl font-bold text-gray-900">
+                {orders.filter(o => o.status === 'accepted').length}
+              </p>
+            </div>
+            <div className="bg-blue-100 p-3 rounded-lg">
+              <CheckCircle className="h-6 w-6 text-blue-600" />
+            </div>
+          </div>
+        </div>
+        
+        <div className="bg-white p-6 rounded-2xl shadow-lg">
+          <div className="flex items-center justify-between">
+            <div>
               <p className="text-sm font-medium text-gray-600">Processing</p>
               <p className="text-3xl font-bold text-gray-900">
                 {orders.filter(o => o.status === 'processing').length}
               </p>
             </div>
-            <div className="bg-blue-100 p-3 rounded-lg">
-              <Truck className="h-6 w-6 text-blue-600" />
+            <div className="bg-orange-100 p-3 rounded-lg">
+              <Truck className="h-6 w-6 text-orange-600" />
             </div>
           </div>
         </div>
@@ -203,9 +270,7 @@ const OrderManagement = () => {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm font-medium text-gray-600">Revenue</p>
-              <p className="text-3xl font-bold text-gray-900">
-                ${orders.reduce((sum, order) => sum + order.total, 0).toFixed(2)}
-              </p>
+              <p className="text-3xl font-bold text-gray-900">₹{orders.reduce((sum, order) => sum + order.total, 0).toFixed(2)}</p>
             </div>
             <div className="bg-green-100 p-3 rounded-lg">
               <CheckCircle className="h-6 w-6 text-green-600" />
@@ -234,8 +299,11 @@ const OrderManagement = () => {
           >
             <option value="all">All Status</option>
             <option value="pending">Pending</option>
+            <option value="accepted">Accepted</option>
             <option value="processing">Processing</option>
-            <option value="completed">Completed</option>
+            <option value="ready">Ready</option>
+            <option value="shipped">Shipped</option>
+            <option value="delivered">Delivered</option>
             <option value="cancelled">Cancelled</option>
           </select>
         </div>
@@ -248,7 +316,7 @@ const OrderManagement = () => {
             <div className="flex items-start justify-between mb-4">
               <div>
                 <div className="flex items-center space-x-3 mb-2">
-                  <h3 className="text-xl font-bold text-gray-900">{order.id}</h3>
+                  <h3 className="text-xl font-bold text-gray-900">{order.orderNumber}</h3>
                   <div className="flex items-center space-x-1">
                     {getStatusIcon(order.status)}
                     <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getStatusBadge(order.status)}`}>
@@ -256,11 +324,11 @@ const OrderManagement = () => {
                     </span>
                   </div>
                 </div>
-                <p className="text-gray-600">{order.vendor}</p>
+                <p className="text-gray-600">{order.vendorName}</p>
                 <p className="text-sm text-gray-500">{order.vendorEmail}</p>
               </div>
               <div className="text-right">
-                <p className="text-2xl font-bold text-green-600">${order.total}</p>
+                <p className="text-2xl font-bold text-green-600">₹{order.total}</p>
                 <p className="text-sm text-gray-500">Order Date: {order.orderDate}</p>
                 <p className="text-sm text-gray-500">Delivery: {order.deliveryDate}</p>
               </div>
@@ -269,13 +337,13 @@ const OrderManagement = () => {
             <div className="border-t border-gray-200 pt-4 mb-4">
               <h4 className="font-semibold text-gray-900 mb-2">Order Items:</h4>
               <div className="space-y-2">
-                {order.items.map((item, index) => (
+                {order.items?.map((item, index) => (
                   <div key={index} className="flex justify-between items-center text-sm">
                     <span className="text-gray-700">
-                      {item.name} - {item.quantity} {item.unit}
+                      {item.productName || item.name} - {item.quantity} {item.unit}
                     </span>
                     <span className="font-medium text-gray-900">
-                      ${(item.quantity * item.price).toFixed(2)}
+                      ₹{(item.quantity * item.price).toFixed(2)}
                     </span>
                   </div>
                 ))}
@@ -286,7 +354,7 @@ const OrderManagement = () => {
               <div className="flex items-center justify-between">
                 <div className="text-sm text-gray-600">
                   <p><strong>Payment:</strong> {order.paymentMethod}</p>
-                  <p><strong>Shipping:</strong> {order.shippingAddress}</p>
+                  <p><strong>Shipping:</strong> {order.deliveryAddress}</p>
                 </div>
                 <div className="flex space-x-2">
                   <button className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg font-medium hover:bg-gray-200 transition-colors duration-200 flex items-center space-x-1">
@@ -295,15 +363,39 @@ const OrderManagement = () => {
                   </button>
                   {order.status === 'pending' && (
                     <button
-                      onClick={() => handleStatusUpdate(order.id, 'processing')}
+                      onClick={() => handleStatusUpdate(order.id, 'accepted')}
                       className="px-4 py-2 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 transition-colors duration-200"
                     >
                       Accept Order
                     </button>
                   )}
+                  {order.status === 'accepted' && (
+                    <button
+                      onClick={() => handleStatusUpdate(order.id, 'processing')}
+                      className="px-4 py-2 bg-orange-600 text-white rounded-lg font-medium hover:bg-orange-700 transition-colors duration-200"
+                    >
+                      Start Processing
+                    </button>
+                  )}
                   {order.status === 'processing' && (
                     <button
-                      onClick={() => handleStatusUpdate(order.id, 'completed')}
+                      onClick={() => handleStatusUpdate(order.id, 'ready')}
+                      className="px-4 py-2 bg-green-600 text-white rounded-lg font-medium hover:bg-green-700 transition-colors duration-200"
+                    >
+                      Mark Ready
+                    </button>
+                  )}
+                  {order.status === 'ready' && (
+                    <button
+                      onClick={() => handleStatusUpdate(order.id, 'shipped')}
+                      className="px-4 py-2 bg-purple-600 text-white rounded-lg font-medium hover:bg-purple-700 transition-colors duration-200"
+                    >
+                      Mark Shipped
+                    </button>
+                  )}
+                  {order.status === 'shipped' && (
+                    <button
+                      onClick={() => handleStatusUpdate(order.id, 'delivered')}
                       className="px-4 py-2 bg-green-600 text-white rounded-lg font-medium hover:bg-green-700 transition-colors duration-200"
                     >
                       Mark Delivered
@@ -362,10 +454,10 @@ const OrderManagement = () => {
                   <div>
                     <h3 className="text-lg font-semibold text-gray-900 mb-2">Customer Information</h3>
                     <div className="space-y-2 text-sm">
-                      <p><strong>Vendor:</strong> {selectedOrder.vendor}</p>
+                      <p><strong>Vendor:</strong> {selectedOrder.vendorName}</p>
                       <p><strong>Email:</strong> {selectedOrder.vendorEmail}</p>
                       <p><strong>Shipping Address:</strong></p>
-                      <p className="text-gray-600 ml-4">{selectedOrder.shippingAddress}</p>
+                      <p className="text-gray-600 ml-4">{selectedOrder.deliveryAddress}</p>
                     </div>
                   </div>
                 </div>
@@ -375,16 +467,16 @@ const OrderManagement = () => {
                   <h3 className="text-lg font-semibold text-gray-900 mb-4">Order Items</h3>
                   <div className="bg-gray-50 rounded-lg p-4">
                     <div className="space-y-3">
-                      {selectedOrder.items.map((item, index) => (
+                      {selectedOrder.items?.map((item, index) => (
                         <div key={index} className="flex justify-between items-center py-2 border-b border-gray-200 last:border-b-0">
                           <div>
-                            <p className="font-medium text-gray-900">{item.name}</p>
+                            <p className="font-medium text-gray-900">{item.productName || item.name}</p>
                             <p className="text-sm text-gray-500">
-                              {item.quantity} {item.unit} × ${item.price}
+                              {item.quantity} {item.unit} × ₹{item.price}
                             </p>
                           </div>
                           <p className="font-semibold text-gray-900">
-                            ${(item.quantity * item.price).toFixed(2)}
+                            ₹{(item.quantity * item.price).toFixed(2)}
                           </p>
                         </div>
                       ))}
@@ -392,7 +484,7 @@ const OrderManagement = () => {
                     <div className="border-t border-gray-300 pt-3 mt-3">
                       <div className="flex justify-between items-center">
                         <p className="text-lg font-bold text-gray-900">Total Amount:</p>
-                        <p className="text-xl font-bold text-green-600">${selectedOrder.total}</p>
+                        <p className="text-xl font-bold text-green-600">₹{selectedOrder.total}</p>
                       </div>
                     </div>
                   </div>

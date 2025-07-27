@@ -31,9 +31,9 @@ const Cart = () => {
       name: 'Fresh Tomatoes',
       supplier: 'Green Valley Farms',
       supplierId: 1,
-      price: 2.50,
+      price: 80,
       quantity: 10,
-      unit: 'lbs',
+      unit: 'kg',
       image: 'https://images.pexels.com/photos/533280/pexels-photo-533280.jpeg?auto=compress&cs=tinysrgb&w=100&h=100&fit=crop',
       minOrder: 5,
       deliveryTime: '1-2 days'
@@ -44,9 +44,9 @@ const Cart = () => {
       name: 'Premium Ground Beef',
       supplier: 'Quality Meats Co.',
       supplierId: 2,
-      price: 8.99,
+      price: 450,
       quantity: 5,
-      unit: 'lbs',
+      unit: 'kg',
       image: 'https://images.pexels.com/photos/2338407/pexels-photo-2338407.jpeg?auto=compress&cs=tinysrgb&w=100&h=100&fit=crop',
       minOrder: 2,
       deliveryTime: '1-3 days'
@@ -57,9 +57,9 @@ const Cart = () => {
       name: 'Mixed Spice Blend',
       supplier: 'Spice Masters',
       supplierId: 3,
-      price: 12.99,
+      price: 650,
       quantity: 2,
-      unit: '5lb bags',
+      unit: 'kg',
       image: 'https://images.pexels.com/photos/1340116/pexels-photo-1340116.jpeg?auto=compress&cs=tinysrgb&w=100&h=100&fit=crop',
       minOrder: 1,
       deliveryTime: '2-3 days'
@@ -204,7 +204,7 @@ const Cart = () => {
   const calculateSummary = (): CartSummary => {
     const subtotal = cartItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
     const tax = subtotal * 0.08; // 8% tax
-    const deliveryFee = subtotal > 100 ? 0 : 15; // Free delivery over $100
+    const deliveryFee = subtotal > 1000 ? 0 : 100; // Free delivery over ₹1000
     const total = subtotal + tax + deliveryFee;
 
     return { subtotal, tax, deliveryFee, total };
@@ -261,13 +261,6 @@ const Cart = () => {
   // Place order
   const placeOrder = async () => {
     setIsProcessing(true);
-  <button
-    onClick={handlePayment}
-    disabled={isProcessing}
-    className="w-full mt-6 bg-gradient-to-r from-orange-500 to-red-500 text-white py-3 px-4 rounded-lg font-semibold hover:shadow-lg transform hover:-translate-y-0.5 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
-  >
-    {isProcessing ? 'Processing...' : 'Pay ₹' + summary.total.toFixed(2)}
-  </button>
 
     try {
       // Create orders for each supplier
@@ -345,7 +338,7 @@ const Cart = () => {
       <div className="space-y-6">
         <div className="flex items-center space-x-4">
           <Link
-            to="/marketplace"
+            to="/vendor/marketplace"
             className="flex items-center space-x-2 text-gray-600 hover:text-orange-500 transition-colors duration-200"
           >
             <ArrowLeft className="h-5 w-5" />
@@ -359,7 +352,7 @@ const Cart = () => {
             <h3 className="text-xl font-bold text-gray-900 mb-2">Your cart is empty</h3>
             <p className="text-gray-600 mb-6">Add some products from our marketplace to get started</p>
             <Link
-              to="/marketplace"
+              to="/vendor/marketplace"
               className="bg-gradient-to-r from-orange-500 to-red-500 text-white px-6 py-3 rounded-lg font-semibold hover:shadow-lg transform hover:-translate-y-0.5 transition-all duration-200 inline-block"
             >
               Browse Marketplace
@@ -376,7 +369,7 @@ const Cart = () => {
       <div className="flex items-center justify-between">
         <div className="flex items-center space-x-4">
           <Link
-            to="/marketplace"
+            to="/vendor/marketplace"
             className="flex items-center space-x-2 text-gray-600 hover:text-orange-500 transition-colors duration-200"
           >
             <ArrowLeft className="h-5 w-5" />
@@ -416,7 +409,7 @@ const Cart = () => {
                     <div className="flex-1">
                       <h4 className="font-medium text-gray-900">{item.name}</h4>
                       <p className="text-sm text-gray-500">
-                        ${item.price} {item.unit} • Min order: {item.minOrder} {item.unit}
+                        ₹{item.price} {item.unit} • Min order: {item.minOrder} {item.unit}
                       </p>
                       <p className="text-sm text-gray-500">Delivery: {item.deliveryTime}</p>
                     </div>
@@ -438,7 +431,7 @@ const Cart = () => {
                     </div>
                     <div className="text-right">
                       <p className="font-semibold text-gray-900">
-                        ${(item.price * item.quantity).toFixed(2)}
+                        ₹{(item.price * item.quantity).toFixed(2)}
                       </p>
                       <button
                         onClick={() => removeItem(item.id)}
@@ -562,22 +555,22 @@ const Cart = () => {
             <div className="space-y-3">
               <div className="flex justify-between">
                 <span className="text-gray-600">Subtotal</span>
-                <span className="font-medium">${summary.subtotal.toFixed(2)}</span>
+                <span className="font-medium">₹{summary.subtotal.toFixed(2)}</span>
               </div>
               <div className="flex justify-between">
                 <span className="text-gray-600">Tax (8%)</span>
-                <span className="font-medium">${summary.tax.toFixed(2)}</span>
+                <span className="font-medium">₹{summary.tax.toFixed(2)}</span>
               </div>
               <div className="flex justify-between">
                 <span className="text-gray-600">Delivery Fee</span>
                 <span className="font-medium">
-                  {summary.deliveryFee === 0 ? 'FREE' : `$${summary.deliveryFee.toFixed(2)}`}
+                  {summary.deliveryFee === 0 ? 'FREE' : `₹${summary.deliveryFee.toFixed(2)}`}
                 </span>
               </div>
               <div className="border-t border-gray-200 pt-3">
                 <div className="flex justify-between">
                   <span className="text-lg font-semibold text-gray-900">Total</span>
-                  <span className="text-lg font-bold text-green-600">${summary.total.toFixed(2)}</span>
+                  <span className="text-lg font-bold text-green-600">₹{summary.total.toFixed(2)}</span>
                 </div>
               </div>
             </div>
@@ -590,9 +583,9 @@ const Cart = () => {
               {isProcessing ? 'Processing...' : 'Place Order'}
             </button>
 
-            {summary.subtotal < 100 && (
+            {summary.subtotal < 1000 && (
               <p className="text-sm text-gray-500 mt-2 text-center">
-                Add ${(100 - summary.subtotal).toFixed(2)} more for free delivery!
+                Add ₹{(1000 - summary.subtotal).toFixed(2)} more for free delivery!
               </p>
             )}
           </div>

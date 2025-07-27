@@ -12,7 +12,9 @@ const Register = () => {
     email: '',
     password: '',
     confirmPassword: '',
-    role: defaultRole
+    role: defaultRole,
+    businessName: '',
+    businessId: ''
   });
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -33,8 +35,7 @@ const Register = () => {
     }
 
     try {
-      await register(formData.email, formData.password, formData.name, formData.role);
-      
+      await register(formData.email, formData.password, formData.name, formData.role, formData.businessName, formData.businessId);
       // Redirect based on role
       if (formData.role === 'seller') {
         navigate('/seller');
@@ -91,6 +92,48 @@ const Register = () => {
                 <option value="vendor">Vendor (Street Food Business)</option>
                 <option value="seller">Supplier (Raw Materials)</option>
               </select>
+            </div>
+
+            <div>
+              <label htmlFor="businessName" className="block text-sm font-medium text-gray-700 mb-2">
+                Business Name *
+              </label>
+              <div className="relative">
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                  <User className="h-5 w-5 text-gray-400" />
+                </div>
+                <input
+                  id="businessName"
+                  name="businessName"
+                  type="text"
+                  required
+                  value={formData.businessName}
+                  onChange={handleInputChange}
+                  className="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all duration-200"
+                  placeholder={formData.role === 'vendor' ? "Enter your business name (e.g., Maria's Tacos)" : "Enter your business name (e.g., Fresh Farms Co.)"}
+                />
+              </div>
+            </div>
+
+            <div>
+              <label htmlFor="businessId" className="block text-sm font-medium text-gray-700 mb-2">
+                Business ID *
+              </label>
+              <div className="relative">
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                  <User className="h-5 w-5 text-gray-400" />
+                </div>
+                <input
+                  id="businessId"
+                  name="businessId"
+                  type="text"
+                  required
+                  value={formData.businessId}
+                  onChange={handleInputChange}
+                  className="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all duration-200"
+                  placeholder={formData.role === 'vendor' ? "Enter business ID (e.g., VEN001)" : "Enter business ID (e.g., SUP001)"}
+                />
+              </div>
             </div>
 
             <div>

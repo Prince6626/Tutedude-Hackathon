@@ -6,12 +6,14 @@ interface User {
   role: 'admin' | 'seller' | 'vendor';
   name: string;
   avatar?: string;
+  businessId?: string;
+  businessName?: string;
 }
 
 interface AuthContextType {
   user: User | null;
   login: (email: string, password: string) => Promise<void>;
-  register: (email: string, password: string, name: string, role: 'seller' | 'vendor') => Promise<void>;
+  register: (email: string, password: string, name: string, role: 'seller' | 'vendor', businessName: string, businessId: string) => Promise<void>;
   logout: () => void;
   loading: boolean;
 }
@@ -26,75 +28,82 @@ export const useAuth = () => {
   return context;
 };
 
+const API_BASE_URL = 'http://localhost:3001/api';
+
+const authAPI = {
+  login: async (email: string, password: string) => {
+    const response = await fetch(`${API_BASE_URL}/auth/login`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, password }),
+    });
+    if (!response.ok) throw new Error('Login failed');
+    const data = await response.json();
+    localStorage.setItem('token', data.token);
+    localStorage.setItem('user', JSON.stringify(data.user));
+    return data;
+  },
+  register: async (email: string, password: string, name: string, role: 'seller' | 'vendor', businessName: string, businessId: string) => {
+    const response = await fetch(`${API_BASE_URL}/auth/register`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, password, name, role, businessName, businessId }),
+    });
+    if (!response.ok) throw new Error('Registration failed');
+    const data = await response.json();
+    localStorage.setItem('token', data.token);
+    localStorage.setItem('user', JSON.stringify(data.user));
+    return data;
+  },
+  logout: () => {
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+  },
+  getCurrentUser: () => {
+    const userStr = localStorage.getItem('user');
+    return userStr ? JSON.parse(userStr) : null;
+  },
+};
+
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Check for existing session
-    const savedUser = localStorage.getItem('user');
-    if (savedUser) {
-      setUser(JSON.parse(savedUser));
-    }
+    const savedUser = authAPI.getCurrentUser();
+    if (savedUser) setUser(savedUser);
     setLoading(false);
   }, []);
 
   const login = async (email: string, password: string) => {
     setLoading(true);
     try {
-      // Mock authentication - replace with real Supabase auth
-      const mockUser: User = {
-        id: '1',
-        email,
-        role: email.includes('admin') ? 'admin' : email.includes('seller') ? 'seller' : 'vendor',
-        name: email.split('@')[0],
-        avatar: `https://images.pexels.com/photos/3764578/pexels-photo-3764578.jpeg?auto=compress&cs=tinysrgb&w=150&h=150&fit=crop`
-      };
-      
-      setUser(mockUser);
-      localStorage.setItem('user', JSON.stringify(mockUser));
+      const response = await authAPI.login(email, password);
+      setUser(response.user);
     } catch (error) {
-      throw new Error('Login failed');
+      throw error;
     } finally {
       setLoading(false);
     }
   };
 
-  const register = async (email: string, password: string, name: string, role: 'seller' | 'vendor') => {
+  const register = async (email: string, password: string, name: string, role: 'seller' | 'vendor', businessName: string, businessId: string) => {
     setLoading(true);
     try {
-      // Mock registration - replace with real Supabase auth
-      const mockUser: User = {
-        id: Date.now().toString(),
-        email,
-        role,
-        name,
-        avatar: `https://images.pexels.com/photos/3764578/pexels-photo-3764578.jpeg?auto=compress&cs=tinysrgb&w=150&h=150&fit=crop`,
-        businessId: Date.now().toString(),
-        businessName: role === 'seller' ? `${name} Supplies` : `${name}'s Food Business`
-      };
-      
-      setUser(mockUser);
-      localStorage.setItem('user', JSON.stringify(mockUser));
+      const response = await authAPI.register(email, password, name, role, businessName, businessId);
+      setUser(response.user);
     } catch (error) {
-      throw new Error('Registration failed');
+      throw error;
     } finally {
       setLoading(false);
     }
   };
 
   const logout = () => {
+    authAPI.logout();
     setUser(null);
-    localStorage.removeItem('user');
   };
 
-  const value = {
-    user,
-    login,
-    register,
-    logout,
-    loading
-  };
-
+  const value = { user, login, register, logout, loading };
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };

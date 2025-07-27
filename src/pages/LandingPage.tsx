@@ -17,7 +17,7 @@ const LandingPage = () => {
             </div>
             <div className="flex items-center space-x-4">
               <Link
-                to="/marketplace"
+                to="/vendor/marketplace"
                 className="text-gray-700 hover:text-orange-500 transition-colors duration-200 font-medium"
               >
                 Marketplace
@@ -63,7 +63,7 @@ const LandingPage = () => {
                 <ArrowRight className="h-5 w-5" />
               </Link>
               <Link
-                to="/marketplace"
+                to="/vendor/marketplace"
                 className="border-2 border-orange-500 text-orange-500 px-8 py-4 rounded-lg font-semibold text-lg hover:bg-orange-500 hover:text-white transform hover:-translate-y-1 transition-all duration-300"
               >
                 Browse Marketplace

@@ -115,7 +115,7 @@ const ExpenseTracking = () => {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm font-medium text-gray-600">Total Spent</p>
-              <p className="text-3xl font-bold text-gray-900">${totalSpent.toLocaleString()}</p>
+              <p className="text-3xl font-bold text-gray-900">₹{totalSpent.toLocaleString()}</p>
               <p className="text-sm text-green-600">+12% from last period</p>
             </div>
             <div className="bg-green-100 p-3 rounded-lg">
@@ -128,7 +128,7 @@ const ExpenseTracking = () => {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm font-medium text-gray-600">Avg Monthly</p>
-              <p className="text-3xl font-bold text-gray-900">${avgMonthlySpend.toFixed(0)}</p>
+              <p className="text-3xl font-bold text-gray-900">₹{avgMonthlySpend.toFixed(0)}</p>
               <p className="text-sm text-blue-600">Consistent spending</p>
             </div>
             <div className="bg-blue-100 p-3 rounded-lg">
@@ -154,7 +154,7 @@ const ExpenseTracking = () => {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm font-medium text-gray-600">Avg Order Value</p>
-              <p className="text-3xl font-bold text-gray-900">${avgOrderValue.toFixed(2)}</p>
+              <p className="text-3xl font-bold text-gray-900">₹{avgOrderValue.toFixed(2)}</p>
               <p className="text-sm text-orange-600">Per transaction</p>
             </div>
             <div className="bg-orange-100 p-3 rounded-lg">
@@ -217,7 +217,7 @@ const ExpenseTracking = () => {
                   <p className="text-sm text-gray-500">{supplier.orders} orders • {supplier.category}</p>
                 </div>
                 <div className="text-right">
-                  <p className="font-semibold text-gray-900">${supplier.amount}</p>
+                  <p className="font-semibold text-gray-900">₹{supplier.amount}</p>
                   <p className="text-sm text-gray-500">Total spent</p>
                 </div>
               </div>
@@ -242,7 +242,7 @@ const ExpenseTracking = () => {
                   <p className="text-xs text-gray-500">{expense.date} • {expense.paymentMethod}</p>
                 </div>
                 <div className="text-right">
-                  <p className="font-semibold text-gray-900">${expense.amount}</p>
+                  <p className="font-semibold text-gray-900">₹{expense.amount}</p>
                 </div>
               </div>
             ))}
@@ -260,7 +260,7 @@ const ExpenseTracking = () => {
                 <h4 className="font-medium text-gray-900">{category.name}</h4>
                 <span className="text-sm font-semibold text-gray-600">{category.value}%</span>
               </div>
-              <p className="text-2xl font-bold text-gray-900">${category.amount}</p>
+              <p className="text-2xl font-bold text-gray-900">₹{category.amount}</p>
               <div className="w-full bg-gray-200 rounded-full h-2 mt-2">
                 <div
                   className="h-2 rounded-full"

@@ -72,7 +72,7 @@ const Reports = () => {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm font-medium text-gray-600">Total Revenue</p>
-              <p className="text-3xl font-bold text-gray-900">$124,500</p>
+              <p className="text-3xl font-bold text-gray-900">₹124,500</p>
               <p className="text-sm text-green-600">+12% from last month</p>
             </div>
             <div className="bg-green-100 p-3 rounded-lg">
@@ -111,7 +111,7 @@ const Reports = () => {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm font-medium text-gray-600">Avg Order Value</p>
-              <p className="text-3xl font-bold text-gray-900">$92.15</p>
+              <p className="text-3xl font-bold text-gray-900">₹92.15</p>
               <p className="text-sm text-orange-600">+5% from last month</p>
             </div>
             <div className="bg-orange-100 p-3 rounded-lg">
@@ -174,7 +174,7 @@ const Reports = () => {
                   <p className="text-sm text-gray-500">{supplier.orders} orders • Rating: {supplier.rating}</p>
                 </div>
                 <div className="text-right">
-                  <p className="font-semibold text-gray-900">${supplier.revenue.toLocaleString()}</p>
+                  <p className="font-semibold text-gray-900">₹{supplier.revenue.toLocaleString()}</p>
                   <p className="text-sm text-gray-500">Revenue</p>
                 </div>
               </div>
@@ -193,7 +193,7 @@ const Reports = () => {
                   <p className="text-sm text-gray-500">{vendor.orders} orders • {vendor.location}</p>
                 </div>
                 <div className="text-right">
-                  <p className="font-semibold text-gray-900">${vendor.spent.toLocaleString()}</p>
+                  <p className="font-semibold text-gray-900">₹{vendor.spent.toLocaleString()}</p>
                   <p className="text-sm text-gray-500">Total Spent</p>
                 </div>
               </div>

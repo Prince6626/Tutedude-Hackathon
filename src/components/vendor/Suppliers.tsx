@@ -303,7 +303,7 @@ const Suppliers = () => {
 
               <div className="grid grid-cols-2 gap-4 text-sm text-gray-600 mb-4">
                 <div>
-                  <span className="font-medium">Min Order:</span> ${supplier.minOrder}
+                  <span className="font-medium">Min Order:</span> ₹{supplier.minOrder}
                 </div>
                 <div>
                   <span className="font-medium">Delivery:</span> {supplier.deliveryTime}

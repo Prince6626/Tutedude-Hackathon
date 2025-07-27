@@ -1,17 +1,11 @@
 import React from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
+import { useCart } from '../../contexts/CartContext';
 import { 
-  LayoutDashboard, 
-  ShoppingCart, 
-  Users, 
-  DollarSign,
-  User,
-  LogOut,
-  Bell,
-  Utensils,
-  ShoppingBag,
-  Store
+  LayoutDashboard, Package, ShoppingCart, BarChart3, 
+  Settings, User, LogOut, Truck, MapPin, CreditCard,
+  TrendingUp, Users, Calendar, Utensils, ShoppingBag, Bell
 } from 'lucide-react';
 
 interface VendorLayoutProps {
@@ -20,6 +14,7 @@ interface VendorLayoutProps {
 
 const VendorLayout: React.FC<VendorLayoutProps> = ({ children }) => {
   const { user, logout } = useAuth();
+  const { cartCount } = useCart();
   const location = useLocation();
   const navigate = useNavigate();
 
@@ -30,11 +25,12 @@ const VendorLayout: React.FC<VendorLayoutProps> = ({ children }) => {
 
   const navigation = [
     { name: 'Overview', href: '/vendor', icon: LayoutDashboard },
-    { name: 'Marketplace', href: '/vendor/marketplace', icon: Store },
-    { name: 'Cart', href: '/vendor/cart', icon: ShoppingBag },
-    { name: 'Order History', href: '/vendor/orders', icon: ShoppingCart },
+    { name: 'Marketplace', href: '/vendor/marketplace', icon: Package },
+    { name: 'Cart', href: '/vendor/cart', icon: ShoppingCart },
+    { name: 'Order History', href: '/vendor/orders', icon: BarChart3 },
     { name: 'Suppliers', href: '/vendor/suppliers', icon: Users },
-    { name: 'Expense Tracking', href: '/vendor/expenses', icon: DollarSign },
+    { name: 'Expense Tracking', href: '/vendor/expenses', icon: CreditCard },
+    { name: 'Delivery Tracking', href: '/vendor/delivery', icon: Truck },
     { name: 'Profile', href: '/vendor/profile', icon: User },
   ];
 
@@ -108,9 +104,11 @@ const VendorLayout: React.FC<VendorLayoutProps> = ({ children }) => {
                   className="relative p-2 text-gray-400 hover:text-gray-600 transition-colors duration-200"
                 >
                   <ShoppingBag className="h-5 w-5" />
+                  {cartCount > 0 && (
                   <span className="absolute -top-1 -right-1 bg-orange-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
-                    3
+                      {cartCount}
                   </span>
+                  )}
                 </Link>
                 <button className="p-2 text-gray-400 hover:text-gray-600 transition-colors duration-200">
                   <Bell className="h-5 w-5" />

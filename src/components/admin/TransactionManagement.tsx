@@ -126,7 +126,7 @@ const TransactionManagement = () => {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm font-medium text-gray-600">Total Amount</p>
-              <p className="text-3xl font-bold text-gray-900">${totalAmount.toFixed(2)}</p>
+              <p className="text-3xl font-bold text-gray-900">₹{totalAmount.toFixed(2)}</p>
             </div>
             <div className="bg-green-100 p-3 rounded-lg">
               <CheckCircle className="h-6 w-6 text-green-600" />
@@ -239,7 +239,7 @@ const TransactionManagement = () => {
                     <div className="text-sm text-gray-500">→ {transaction.supplier}</div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm font-medium text-gray-900">${transaction.amount}</div>
+                    <div className="text-sm font-medium text-gray-900">₹{transaction.amount}</div>
                     <div className="text-sm text-gray-500">{transaction.items}</div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">

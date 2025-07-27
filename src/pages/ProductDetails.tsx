@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
-import { Link, useParams } from 'react-router-dom';
+import { Link, useParams, useNavigate } from 'react-router-dom';
 import { ArrowLeft, Star, MapPin, Truck, Shield, MessageCircle, ShoppingCart } from 'lucide-react';
 
 const ProductDetails = () => {
   const { id } = useParams();
+  const navigate = useNavigate();
   const [quantity, setQuantity] = useState(1);
   const [isAddingToCart, setIsAddingToCart] = useState(false);
 
@@ -78,10 +79,13 @@ const ProductDetails = () => {
       <header className="bg-white shadow-lg sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center py-4">
-            <Link to="/marketplace" className="flex items-center space-x-2 text-gray-600 hover:text-orange-500 transition-colors duration-200">
+                            <button 
+              onClick={() => navigate(-1)} 
+              className="flex items-center space-x-2 text-gray-600 hover:text-orange-500 transition-colors duration-200"
+            >
               <ArrowLeft className="h-5 w-5" />
-              <span>Back to Marketplace</span>
-            </Link>
+              <span>Back</span>
+            </button>
             <Link to="/" className="flex items-center space-x-2">
               <div className="bg-gradient-to-r from-orange-500 to-red-500 p-2 rounded-lg">
                 <ShoppingCart className="h-6 w-6 text-white" />
@@ -123,21 +127,23 @@ const ProductDetails = () => {
             <div className="bg-white p-6 rounded-2xl shadow-lg">
               <h1 className="text-3xl font-bold text-gray-900 mb-2">{product.name}</h1>
               <div className="flex items-center space-x-4 mb-4">
-                <div className="flex items-center space-x-1">
-                  <Star className="h-5 w-5 text-yellow-400 fill-current" />
-                  <span className="font-semibold">{product.rating}</span>
-                  <span className="text-gray-500">({product.reviews} reviews)</span>
-                </div>
                 <div className="flex items-center text-gray-500">
                   <MapPin className="h-4 w-4 mr-1" />
                   {product.location}
                 </div>
               </div>
               
-              <div className="flex items-baseline space-x-2 mb-6">
-                <span className="text-4xl font-bold text-green-600">${product.price}</span>
-                <span className="text-gray-500 text-lg">{product.unit}</span>
-              </div>
+              <div className="flex items-center justify-between mb-4">
+                  <div>
+                    <span className="text-3xl font-bold text-orange-600">₹{product.price}</span>
+                    <span className="text-gray-500 ml-2">per {product.unit}</span>
+                  </div>
+                  <div className="flex items-center space-x-1">
+                    <Star className="h-5 w-5 text-yellow-400 fill-current" />
+                    <span className="text-lg font-semibold">{product.rating}</span>
+                    <span className="text-gray-500">({product.reviews} reviews)</span>
+                  </div>
+                </div>
 
               <p className="text-gray-600 mb-6">{product.description}</p>
 
@@ -155,7 +161,7 @@ const ProductDetails = () => {
                   <span className="text-gray-500">lbs</span>
                 </div>
                 <div className="text-lg font-semibold text-gray-900">
-                  Total: ${(product.price * quantity).toFixed(2)}
+                  Total: ₹{(product.price * quantity).toFixed(2)}
                 </div>
               </div>
 

@@ -14,7 +14,7 @@ const AdminOverview = () => {
     },
     {
       name: 'Monthly Revenue',
-      value: '$45,231',
+      value: '₹45,231',
       change: '+8%',
       changeType: 'positive',
       icon: DollarSign,
@@ -60,7 +60,7 @@ const AdminOverview = () => {
     { id: 1, type: 'user_registered', message: 'New vendor "Maria\'s Tacos" registered', time: '2 minutes ago' },
     { id: 2, type: 'order_placed', message: 'Order #ORD-001 placed by Maria\'s Tacos', time: '5 minutes ago' },
     { id: 3, type: 'order_completed', message: 'Order #ORD-002 completed by Green Valley Farms', time: '10 minutes ago' },
-    { id: 4, type: 'payment_processed', message: 'Payment of $245.50 processed for Order #ORD-001', time: '15 minutes ago' },
+    { id: 4, type: 'payment_processed', message: 'Payment of ₹245.50 processed for Order #ORD-001', time: '15 minutes ago' },
     { id: 5, type: 'message_sent', message: 'Vendor contacted supplier about order inquiry', time: '20 minutes ago' }
   ];
 

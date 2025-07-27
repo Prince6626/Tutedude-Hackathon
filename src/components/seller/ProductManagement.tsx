@@ -153,9 +153,7 @@ const ProductManagement = () => {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm font-medium text-gray-600">Total Revenue</p>
-              <p className="text-3xl font-bold text-gray-900">
-                ${products.reduce((sum, p) => sum + p.revenue, 0).toLocaleString()}
-              </p>
+              <p className="text-3xl font-bold text-gray-900">₹{products.reduce((sum, p) => sum + p.revenue, 0).toLocaleString()}</p>
             </div>
             <div className="bg-orange-100 p-3 rounded-lg">
               <Package className="h-6 w-6 text-orange-600" />
@@ -216,7 +214,7 @@ const ProductManagement = () => {
               
               <div className="flex items-center justify-between mb-4">
                 <div>
-                  <span className="text-2xl font-bold text-green-600">${product.price}</span>
+                  <span className="text-2xl font-bold text-green-600">₹{product.price}</span>
                   <span className="text-gray-500 ml-1">{product.unit}</span>
                 </div>
                 <div className="text-right">

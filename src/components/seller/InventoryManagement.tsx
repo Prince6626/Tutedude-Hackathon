@@ -164,7 +164,7 @@ const InventoryManagement = () => {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm font-medium text-gray-600">Inventory Value</p>
-              <p className="text-3xl font-bold text-gray-900">${totalValue.toFixed(2)}</p>
+              <p className="text-3xl font-bold text-gray-900">₹{totalValue.toFixed(2)}</p>
             </div>
             <div className="bg-green-100 p-3 rounded-lg">
               <TrendingUp className="h-6 w-6 text-green-600" />
@@ -278,10 +278,10 @@ const InventoryManagement = () => {
                       </span>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                      ${item.costPerUnit}
+                      ₹{item.costPerUnit}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                      ${item.sellPrice}
+                      ₹{item.sellPrice}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                       {item.lastRestocked}

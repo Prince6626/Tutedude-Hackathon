@@ -1,7 +1,8 @@
 import React from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
-import { LayoutDashboard, Package, ShoppingCart, Indent as Inventory, User, LogOut, Bell, Store } from 'lucide-react';
+import { LayoutDashboard, Package, ShoppingCart, Indent as Inventory, User, LogOut, Bell, Store, Truck } from 'lucide-react';
+import DeliveryManagement from './DeliveryManagement';
 
 interface SellerLayoutProps {
   children: React.ReactNode;
@@ -21,6 +22,7 @@ const SellerLayout: React.FC<SellerLayoutProps> = ({ children }) => {
     { name: 'Overview', href: '/seller', icon: LayoutDashboard },
     { name: 'Products', href: '/seller/products', icon: Package },
     { name: 'Orders', href: '/seller/orders', icon: ShoppingCart },
+    { name: 'Delivery Management', href: '/seller/delivery', icon: Truck },
     { name: 'Inventory', href: '/seller/inventory', icon: Inventory },
     { name: 'Profile', href: '/seller/profile', icon: User },
   ];

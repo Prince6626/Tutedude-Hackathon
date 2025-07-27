@@ -15,7 +15,7 @@ const VendorOverview = () => {
     },
     {
       name: 'Total Spent',
-      value: '$2,340',
+      value: '₹2,340',
       change: '+12% from last month',
       changeType: 'positive',
       icon: DollarSign,
@@ -31,7 +31,7 @@ const VendorOverview = () => {
     },
     {
       name: 'Avg Order Value',
-      value: '$52.00',
+      value: '₹52.00',
       change: '+8% from last month',
       changeType: 'positive',
       icon: TrendingUp,
@@ -204,7 +204,7 @@ const VendorOverview = () => {
                   <p className="text-sm text-gray-500">{order.items}</p>
                 </div>
                 <div className="text-right">
-                  <p className="font-semibold text-gray-900">${order.amount}</p>
+                  <p className="font-semibold text-gray-900">₹{order.amount}</p>
                   <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getStatusBadge(order.status)}`}>
                     {order.status.replace('_', ' ')}
                   </span>
@@ -236,7 +236,7 @@ const VendorOverview = () => {
                   <p className="text-sm text-gray-500">{supplier.orders} orders • Rating: {supplier.rating}</p>
                 </div>
                 <div className="text-right">
-                  <p className="font-semibold text-gray-900">${supplier.spent}</p>
+                  <p className="font-semibold text-gray-900">₹{supplier.spent}</p>
                   <p className="text-sm text-gray-500">Total spent</p>
                 </div>
                 <button className="p-1 text-gray-400 hover:text-orange-600">

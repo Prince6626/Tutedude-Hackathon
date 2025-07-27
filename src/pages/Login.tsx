@@ -20,7 +20,6 @@ const Login = () => {
 
     try {
       await login(email, password);
-      
       // Redirect based on role
       if (email.includes('admin')) {
         navigate('/admin');
@@ -109,23 +108,6 @@ const Login = () => {
                   )}
                 </button>
               </div>
-            </div>
-
-            <div className="flex items-center justify-between">
-              <div className="flex items-center">
-                <input
-                  id="remember-me"
-                  name="remember-me"
-                  type="checkbox"
-                  className="h-4 w-4 text-orange-600 focus:ring-orange-500 border-gray-300 rounded"
-                />
-                <label htmlFor="remember-me" className="ml-2 block text-sm text-gray-700">
-                  Remember me
-                </label>
-              </div>
-              <a href="#" className="text-sm text-orange-600 hover:text-orange-500">
-                Forgot password?
-              </a>
             </div>
 
             <button
