@@ -237,10 +237,10 @@ function insertSampleData() {
       {
         email: 'vendor@example.com',
         password: bcrypt.hashSync('password', 10),
-        name: 'Maria\'s Tacos',
+        name: 'Green Valley',
         role: 'vendor',
         businessId: 'VEN001',
-        businessName: 'Maria\'s Tacos',
+        businessName: 'Green Valley',
         avatar: 'https://images.pexels.com/photos/3764578/pexels-photo-3764578.jpeg?auto=compress&cs=tinysrgb&w=150&h=150&fit=crop'
       }
     ];

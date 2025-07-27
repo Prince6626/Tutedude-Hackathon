@@ -276,7 +276,7 @@ const Cart = () => {
         const newOrder = {
           id: `ORD-${Date.now()}-${supplierId}`,
           vendorId: 'vendor-1', // Current vendor ID
-          vendorName: 'Maria\'s Tacos',
+          vendorName: 'Green Valley',
           vendorEmail: 'maria@mariastacos.com',
           supplierId: parseInt(supplierId),
           supplierName: group.supplier,

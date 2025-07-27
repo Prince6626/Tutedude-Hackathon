@@ -33,7 +33,7 @@ const Reports = () => {
   ];
 
   const topVendors = [
-    { name: 'Maria\'s Tacos', orders: 45, spent: 2340, location: 'Los Angeles' },
+    { name: 'Green Valley', orders: 45, spent: 2340, location: 'Los Angeles' },
     { name: 'Dynasty Dumplings', orders: 38, spent: 1980, location: 'San Francisco' },
     { name: 'Spice Street', orders: 32, spent: 1650, location: 'New York' },
     { name: 'El Sabor', orders: 29, spent: 1420, location: 'Miami' },

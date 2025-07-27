@@ -119,7 +119,7 @@ const VendorOverview = () => {
     <div className="space-y-6">
       {/* Welcome Message */}
       <div className="bg-gradient-to-r from-orange-500 to-red-500 p-6 rounded-2xl text-white">
-        <h2 className="text-2xl font-bold mb-2">Welcome back, Maria!</h2>
+        <h2 className="text-2xl font-bold mb-2">Welcome back, Green Valley!</h2>
         <p className="opacity-90">Here's how your street food business is performing today.</p>
       </div>
 

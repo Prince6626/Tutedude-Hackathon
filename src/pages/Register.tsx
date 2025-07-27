@@ -110,7 +110,7 @@ const Register = () => {
                   value={formData.businessName}
                   onChange={handleInputChange}
                   className="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all duration-200"
-                  placeholder={formData.role === 'vendor' ? "Enter your business name (e.g., Maria's Tacos)" : "Enter your business name (e.g., Fresh Farms Co.)"}
+                  placeholder={formData.role === 'vendor' ? "Enter your business name (e.g., Green Valley)" : "Enter your business name (e.g., Fresh Farms Co.)"}
                 />
               </div>
             </div>

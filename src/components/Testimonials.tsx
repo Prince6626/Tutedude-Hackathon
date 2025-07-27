@@ -5,7 +5,7 @@ const Testimonials = () => {
   const testimonials = [
     {
       name: 'Maria Rodriguez',
-      business: 'Maria\'s Tacos',
+      business: 'Green Valley',
       location: 'Los Angeles, CA',
       rating: 5,
       text: 'StreetSmart Supply changed my business completely. I\'m saving 35% on ingredients and my suppliers are incredibly reliable. My customers notice the improved quality!',

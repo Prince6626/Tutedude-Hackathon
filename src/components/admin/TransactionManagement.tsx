@@ -9,7 +9,7 @@ const TransactionManagement = () => {
   const transactions = [
     {
       id: 'TXN-001',
-      vendor: 'Maria\'s Tacos',
+      vendor: 'Green Valley',
       supplier: 'Green Valley Farms',
       amount: 245.50,
       status: 'completed',

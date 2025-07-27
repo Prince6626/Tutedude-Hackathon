@@ -80,7 +80,7 @@ const SellerOverview = () => {
   const recentOrders = [
     {
       id: 'ORD-001',
-      vendor: 'Maria\'s Tacos',
+      vendor: 'Green Valley',
       items: 'Fresh Tomatoes (10 lbs)',
       amount: 25.00,
       status: 'completed',

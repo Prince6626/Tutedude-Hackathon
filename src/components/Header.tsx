@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Menu, X, ShoppingCart } from 'lucide-react';
+import { Menu, X } from 'lucide-react';
 
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -10,9 +10,11 @@ const Header = () => {
         <div className="flex justify-between items-center py-4">
           {/* Logo */}
           <div className="flex items-center space-x-2">
-            <div className="bg-gradient-to-r from-orange-500 to-red-500 p-2 rounded-lg">
-              <ShoppingCart className="h-6 w-6 text-white" />
-            </div>
+            <img 
+              src="/assets/logo.png" 
+              alt="StreetSmart Supply Logo" 
+              className="h-10 w-10 object-contain"
+            />
             <span className="text-2xl font-bold text-gray-900">StreetSmart Supply</span>
           </div>
 
